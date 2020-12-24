@@ -8,9 +8,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.165",
     "discord.js": "^12.5.1",
     "eslint": "^7.16.0",
     "jest": "^26.6.3",
+    "lodash": "^4.17.20",
     "prettier": "^2.2.1",
     "typescript": "^4.1.3"
   },

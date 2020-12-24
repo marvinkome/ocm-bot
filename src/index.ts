@@ -1,6 +1,8 @@
-import Discord from "discord.js"
-import { botParser, scorelineParser } from "./parser"
+import Discord, { TextChannel } from "discord.js"
 import config from "../config.json"
+import { botParser } from "./parser"
+import { removeEmoji } from "./helpers"
+import { scorelineHandler } from "./commands"
 
 const prefix = "!"
 const client = new Discord.Client()
@@ -12,15 +14,16 @@ client.on("message", (message) => {
     const { command, args } = botParser(message.content)
 
     if (command === "scores") {
-        const data = scorelineParser(args)
-        console.log(JSON.stringify(data))
+        let category: any = (message.channel as TextChannel).parent?.name || ""
+        category = removeEmoji(category).toLowerCase()
 
-        const { scores } = data
-        if (scores.home.score > scores.away.score) {
-            message.reply(`Yay!!, ${scores.home.team} wins.`)
-        } else {
-            message.reply(`Yay!!, ${scores.away.team} wins.`)
+        const [response, success] = scorelineHandler(args, category)
+
+        if (!success) {
+            message.react("❌")
         }
+
+        message.reply(response)
     }
 })
 
