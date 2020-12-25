@@ -1,13 +1,19 @@
 import teams from "../teams.json"
 import { emojiRegexp } from "./parser"
 
-type MatchFact = {
+export type MatchFact = {
     scores: {
         home: { team: string; score: number }
         away: { team: string; score: number }
     }
-    stats: any
-    motm: string
+    stats: {
+        [key: string]: {
+            goals?: number
+            assists?: number
+            team: string
+            motm?: boolean
+        }
+    }
 }
 
 type League = keyof typeof teams
@@ -20,25 +26,27 @@ export function verifyMatchFact({ scores, stats }: MatchFact, league: League) {
         throw Error("")
     }
 
-    // verify player stats for home team
+    // verify player stats
     const { team: teamA, score: teamAScore } = scores.home
-    const teamAStatsScore = Object.keys(stats[teamA]).reduce((goals, curr) => {
-        const player = stats[teamA][curr]
+    const { team: teamB, score: teamBScore } = scores.away
 
-        return goals + (player.goals || 0)
-    }, 0)
+    const [teamAStatsScore, teamBStatsScore] = Object.keys(stats).reduce(
+        (goals, curr) => {
+            const player = stats[curr]
+            if (player.team === teamA) {
+                goals[0] = goals[0] + (player.goals || 0)
+            } else if (player.team === teamB) {
+                goals[1] = goals[1] + (player.goals || 0)
+            }
+
+            return goals
+        },
+        [0, 0]
+    )
 
     if (teamAStatsScore !== teamAScore) {
         throw Error("")
     }
-
-    // verify player stats for away team
-    const { team: teamB, score: teamBScore } = scores.away
-    const teamBStatsScore = Object.keys(stats[teamB]).reduce((goals, curr) => {
-        const player = stats[teamB][curr]
-
-        return goals + (player.goals || 0)
-    }, 0)
 
     if (teamBStatsScore !== teamBScore) {
         throw Error("")

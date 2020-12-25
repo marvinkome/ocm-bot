@@ -28,7 +28,7 @@ describe("Parser tests", () => {
         P.Smyth 🅰️🅰️
         Osayi-Samuel 🟥
 
-        MOTM Osayi Samuel (10.0)
+        MOTM Shodipo (10.0)
         @everyone
         `
 
@@ -46,18 +46,13 @@ describe("Parser tests", () => {
                 },
             },
             stats: {
-                Brentford: {
-                    "Adam Smith": { goals: 1, assists: 1 },
-                    "P.Fake": { goals: 1, assists: 1 },
-                    Player: { yellowCard: 1 },
-                },
-                QPR: {
-                    Shodipo: { goals: 3 },
-                    "P.Smyth": { assists: 2 },
-                    "Osayi-Samuel": { redCard: 1 },
-                },
+                "Adam Smith": { goals: 1, assists: 1, team: "Brentford" },
+                "P.Fake": { goals: 1, assists: 1, team: "Brentford" },
+                Player: { yellowCard: 1, team: "Brentford" },
+                Shodipo: { goals: 3, team: "QPR", motm: true },
+                "P.Smyth": { assists: 2, team: "QPR" },
+                "Osayi-Samuel": { redCard: 1, team: "QPR" },
             },
-            motm: "Osayi Samuel",
         })
     })
 })

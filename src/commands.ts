@@ -9,8 +9,6 @@ const SCORELINE_TIPS = `Invalid scoreline. Tips:
 
 export function scorelineHandler(args: string, category: any) {
     try {
-        console.log(category)
-
         const data = scorelineParser(args)
         verifyMatchFact(data, category)
 
