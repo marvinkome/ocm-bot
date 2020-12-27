@@ -22,7 +22,10 @@ export async function scorelineHandler(args: string, category: League) {
         await sheets.updatePlayerStats(data.stats)
         await sheets.updatePlayerCard(data.stats)
 
-        return ["Gg", true]
+        return [
+            `Added scores to sheets for ${data.scores.home.team} vs ${data.scores.away.team}`,
+            true,
+        ]
 
         // add values to google sheet
     } catch (err) {

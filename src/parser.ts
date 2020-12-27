@@ -66,7 +66,7 @@ class LineParser {
         const lastLine = lines.pop()
         let motm = ""
         if (lastLine?.includes("MOTM")) {
-            const motmLine = lines.pop()!.split("MOTM")[1].trim()
+            const motmLine = lastLine.split("MOTM")[1].trim()
             const motmParser = new LineParser(motmLine)
             motm = motmParser.consumeWhile((char) => /^[a-zA-Z-\s]+$/i.test(char)).trim()
         }
