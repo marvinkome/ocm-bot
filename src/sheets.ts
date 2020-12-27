@@ -1,17 +1,20 @@
 import { GoogleSpreadsheet, WorksheetGridRange } from "google-spreadsheet"
+import { MatchFact } from "./types"
 
-const SHEETS_DATA = {
-    ocmSheetsId: "1o2kr3218nRU0R1HwiUg_cjwrfnmItCgZN7SS4VW9vzA",
-    fixturesTab: "859971328",
-    playerStatsTab: "1774202157",
-    cardsTab: "1546579554",
+type SheetsInfo = {
+    sheetsId: string
+    fixturesTab: string
+    cardsTab: string
+    playerStatsTab: string
 }
 
 export class SheetsIntegration {
     doc: GoogleSpreadsheet
+    sheetsInfo: SheetsInfo
 
-    constructor() {
-        this.doc = new GoogleSpreadsheet(SHEETS_DATA.ocmSheetsId)
+    constructor(data: SheetsInfo) {
+        this.sheetsInfo = data
+        this.doc = new GoogleSpreadsheet(data.sheetsId)
 
         // @ts-ignore
         return (async () => {
@@ -25,11 +28,8 @@ export class SheetsIntegration {
         await this.doc.loadInfo()
     }
 
-    async updateScoreline(scores: {
-        home: { team: string; score: number }
-        away: { team: string; score: number }
-    }) {
-        const sheet = this.doc.sheetsById[SHEETS_DATA.fixturesTab]
+    async updateScoreline(scores: MatchFact["scores"]) {
+        const sheet = this.doc.sheetsById[this.sheetsInfo.fixturesTab]
 
         const rows = await sheet.getRows()
         // @ts-ignore
@@ -56,15 +56,8 @@ export class SheetsIntegration {
         }
     }
 
-    async updatePlayerStats(stats: {
-        [key: string]: {
-            goals?: number
-            assists?: number
-            team: string
-            motm?: boolean
-        }
-    }) {
-        const sheet = this.doc.sheetsById[SHEETS_DATA.playerStatsTab]
+    async updatePlayerStats(stats: MatchFact["stats"]) {
+        const sheet = this.doc.sheetsById[this.sheetsInfo.playerStatsTab]
         const players = Object.keys(stats)
 
         const rows = await sheet.getRows()
@@ -174,27 +167,118 @@ export class SheetsIntegration {
         await sheet.saveUpdatedCells()
         console.log("Updated player stats")
     }
+
+    async updatePlayerCard(stats: MatchFact["stats"]) {
+        const sheet = this.doc.sheetsById[this.sheetsInfo.cardsTab]
+        const players = Object.keys(stats)
+
+        const rows = await sheet.getRows()
+
+        await sheet.loadCells({
+            startRowIndex: 1,
+            startColumnIndex: 0,
+            endColumnIndex: 15,
+            endRowIndex: 70,
+        } as WorksheetGridRange)
+
+        // find and update stats
+        for (const row of rows) {
+            // get players in a cell
+            const rowYellowCardPlayer = sheet.getCellByA1(`B${row.rowIndex}`).value as string
+            const rowYellowCardPlayerTeam = sheet.getCellByA1(`D${row.rowIndex}`).value as string
+
+            const rowReadCardPlayer = sheet.getCellByA1(`G${row.rowIndex}`).value as string
+            const rowReadCardPlayerTeam = sheet.getCellByA1(`I${row.rowIndex}`).value as string
+
+            const rowCleanSheetPlayer = sheet.getCellByA1(`L${row.rowIndex}`).value as string
+            const rowCleanSheetPlayerTeam = sheet.getCellByA1(`N${row.rowIndex}`).value as string
+
+            // find and update yellow card
+            const yellowCardPlayer = players.find(
+                (player) => player === rowYellowCardPlayer && (stats[player].yellowCard || 0) > 0
+            )
+            if (yellowCardPlayer && stats[yellowCardPlayer].team === rowYellowCardPlayerTeam) {
+                const cell = sheet.getCellByA1(`C${row.rowIndex}`)
+                cell.value = ((cell.value as number) || 0) + stats[yellowCardPlayer].yellowCard!
+                stats[yellowCardPlayer].yellowCard = 0
+            }
+
+            // find and update red card
+            const redCardPlayer = players.find(
+                (player) => player === rowReadCardPlayer && (stats[player].redCard || 0) > 0
+            )
+            if (redCardPlayer && stats[redCardPlayer].team === rowReadCardPlayerTeam) {
+                const cell = sheet.getCellByA1(`H${row.rowIndex}`)
+                cell.value = ((cell.value as number) || 0) + stats[redCardPlayer].redCard!
+                stats[redCardPlayer].redCard = 0
+            }
+
+            // find and update clean sheet
+            const cleanSheetPlayer = players.find(
+                (player) => player === rowCleanSheetPlayer && stats[player].cleanSheet
+            )
+            if (cleanSheetPlayer && stats[cleanSheetPlayer].team === rowCleanSheetPlayerTeam) {
+                const cell = sheet.getCellByA1(`M${row.rowIndex}`)
+                cell.value = ((cell.value as number) || 0) + 1
+                stats[cleanSheetPlayer].cleanSheet = false
+            }
+
+            // add new player if rows are empty
+            const freeYellowCardPlayer = players.find((key) => stats[key].yellowCard)
+            if (!rowYellowCardPlayer && freeYellowCardPlayer) {
+                const nameCell = sheet.getCellByA1(`B${row.rowIndex}`)
+                const valueCell = sheet.getCellByA1(`C${row.rowIndex}`)
+                const teamCell = sheet.getCellByA1(`D${row.rowIndex}`)
+
+                nameCell.value = freeYellowCardPlayer
+                valueCell.value = stats[freeYellowCardPlayer].yellowCard as number
+                teamCell.value = stats[freeYellowCardPlayer].team
+
+                stats[freeYellowCardPlayer].goals = 0
+            }
+
+            // add new player if rows are empty
+            const freeRedCardPlayer = players.find((key) => stats[key].redCard)
+            if (!rowReadCardPlayer && freeRedCardPlayer) {
+                const nameCell = sheet.getCellByA1(`G${row.rowIndex}`)
+                const valueCell = sheet.getCellByA1(`H${row.rowIndex}`)
+                const teamCell = sheet.getCellByA1(`I${row.rowIndex}`)
+
+                nameCell.value = freeRedCardPlayer
+                valueCell.value = stats[freeRedCardPlayer].assists as number
+                teamCell.value = stats[freeRedCardPlayer].team
+
+                stats[freeRedCardPlayer].redCard = 0
+            }
+
+            // add new player if rows are empty
+            const freeCleanSheetPlayer = players.find((key) => stats[key].cleanSheet)
+            if (!rowCleanSheetPlayer && freeCleanSheetPlayer) {
+                const nameCell = sheet.getCellByA1(`L${row.rowIndex}`)
+                const valueCell = sheet.getCellByA1(`M${row.rowIndex}`)
+                const teamCell = sheet.getCellByA1(`N${row.rowIndex}`)
+
+                nameCell.value = freeCleanSheetPlayer
+                valueCell.value = ((valueCell.value as number) || 0) + 1
+                teamCell.value = stats[freeCleanSheetPlayer].team
+
+                stats[freeCleanSheetPlayer].cleanSheet = false
+            }
+
+            // if all rows are empty and no more free players then break
+            if (
+                !rowYellowCardPlayer &&
+                !rowReadCardPlayer &&
+                !rowCleanSheetPlayer &&
+                !freeYellowCardPlayer &&
+                !freeRedCardPlayer &&
+                !freeCleanSheetPlayer
+            ) {
+                break
+            }
+        }
+
+        await sheet.saveUpdatedCells()
+        console.log("Updated player cards")
+    }
 }
-
-// async function main() {
-//     console.time("run-time")
-//     const mysheets = await new SheetsIntegration()
-
-//     // await mysheets.updateScoreline({
-//     //     home: { team: "Brentford", score: 0 },
-//     //     away: { team: "Huddersfield Town", score: 7 },
-//     // })
-
-//     await mysheets.updatePlayerStats({
-//         Chan: { goals: 1, assists: 1, team: "Swansea City", motm: true },
-//         Smyth: { goals: 1, team: "Queens Park Rangers" },
-//         Kane: { goals: 1, assists: 1, team: "Queens Park Rangers" },
-//     })
-//     console.timeEnd("run-time")
-// }
-
-// try {
-//     main()
-// } catch (err) {
-//     console.log(err)
-// }

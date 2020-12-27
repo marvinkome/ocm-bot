@@ -62,14 +62,18 @@ class LineParser {
         let currentTeam = ""
         const result: any = {}
 
-        // get motm
-        const motmLine = lines.pop()!.split("MOTM")[1].trim()
-        const motmParser = new LineParser(motmLine)
-        const motm = motmParser.consumeWhile((char) => /^[a-zA-Z-\s]+$/i.test(char)).trim()
+        // check and get motm
+        const lastLine = lines.pop()
+        let motm = ""
+        if (lastLine?.includes("MOTM")) {
+            const motmLine = lines.pop()!.split("MOTM")[1].trim()
+            const motmParser = new LineParser(motmLine)
+            motm = motmParser.consumeWhile((char) => /^[a-zA-Z-\s]+$/i.test(char)).trim()
+        }
 
         for (const line of lines) {
             if (!emojiRegexp.test(line)) {
-                currentTeam = trim(line.trim(), "*")
+                currentTeam = trim(trim(line.trim(), "*"), ":")
             } else {
                 const parser = new LineParser(line)
 

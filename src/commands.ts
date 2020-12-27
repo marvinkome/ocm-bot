@@ -1,21 +1,32 @@
 import { verifyMatchFact } from "./helpers"
 import { scorelineParser } from "./parser"
+import { SheetsIntegration } from "./sheets"
+import config from "./config"
+import { League } from "./types"
 
 const SCORELINE_TIPS = `Invalid scoreline. Tips:
 1: Use names as it appears in the sheet. This applies to player names and team names.
 2: Use the specified format as shown here. [format image]
 3: Make sure the player stats match the scores.
-4: Don't forget to tag everyone ;)`
+4: Make sure you're posting in the right channel.
+5: Don't forget to tag everyone ;)`
 
-export function scorelineHandler(args: string, category: any) {
+export async function scorelineHandler(args: string, category: League) {
     try {
         const data = scorelineParser(args)
         verifyMatchFact(data, category)
+
+        const sheets = await new SheetsIntegration(config.sheets[category])
+
+        await sheets.updateScoreline(data.scores)
+        await sheets.updatePlayerStats(data.stats)
+        await sheets.updatePlayerCard(data.stats)
 
         return ["Gg", true]
 
         // add values to google sheet
     } catch (err) {
+        console.error(err)
         return [SCORELINE_TIPS, false]
     }
 }

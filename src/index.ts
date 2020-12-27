@@ -1,5 +1,5 @@
 import Discord, { TextChannel } from "discord.js"
-import config from "../config.json"
+import config from "./config"
 import { botParser } from "./parser"
 import { removeEmoji } from "./helpers"
 import { scorelineHandler } from "./commands"
@@ -7,7 +7,7 @@ import { scorelineHandler } from "./commands"
 const prefix = "!"
 const client = new Discord.Client()
 
-client.on("message", (message) => {
+client.on("message", async (message) => {
     if (message.author.bot) return
     if (!message.content.startsWith(prefix)) return
 
@@ -17,7 +17,8 @@ client.on("message", (message) => {
         let category: any = (message.channel as TextChannel).parent?.name || ""
         category = removeEmoji(category).toLowerCase()
 
-        const [response, success] = scorelineHandler(args, category)
+        console.log(category)
+        const [response, success] = await scorelineHandler(args, category)
 
         if (!success) {
             message.react("❌")
@@ -31,4 +32,4 @@ client.on("ready", () => {
     console.log("Bot online!")
 })
 
-client.login(config.BOT_TOKEN)
+client.login(config.botToken)

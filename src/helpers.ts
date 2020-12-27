@@ -1,26 +1,11 @@
 import teams from "../teams.json"
 import { emojiRegexp } from "./parser"
-
-export type MatchFact = {
-    scores: {
-        home: { team: string; score: number }
-        away: { team: string; score: number }
-    }
-    stats: {
-        [key: string]: {
-            goals?: number
-            assists?: number
-            team: string
-            motm?: boolean
-        }
-    }
-}
-
-type League = keyof typeof teams
+import { MatchFact, League } from "./types"
 
 export function verifyMatchFact({ scores, stats }: MatchFact, league: League) {
     // verify team names
     const leagueTeams = teams[league]
+    console.log(leagueTeams, teams, league)
 
     if (!leagueTeams.includes(scores.home.team) || !leagueTeams.includes(scores.away.team)) {
         throw Error("")
@@ -45,11 +30,11 @@ export function verifyMatchFact({ scores, stats }: MatchFact, league: League) {
     )
 
     if (teamAStatsScore !== teamAScore) {
-        throw Error("")
+        throw Error("Teams doesn't match")
     }
 
     if (teamBStatsScore !== teamBScore) {
-        throw Error("")
+        throw Error("Teams doesn't match")
     }
 
     return true
