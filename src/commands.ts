@@ -16,18 +16,19 @@ export async function scorelineHandler(args: string, category: League) {
         const data = scorelineParser(args)
         verifyMatchFact(data, category)
 
-        const sheets = await new SheetsIntegration(config.sheets[category])
+        console.log(data, category)
 
-        await sheets.updateScoreline(data.scores)
-        await sheets.updatePlayerStats(data.stats)
-        await sheets.updatePlayerCard(data.stats)
+        // // add values to google sheet
+        // const sheets = await new SheetsIntegration(config.sheets[category])
+
+        // await sheets.updateScoreline(data.scores)
+        // await sheets.updatePlayerStats(data.stats)
+        // await sheets.updatePlayerCard(data.stats)
 
         return [
             `Added scores to sheets for ${data.scores.home.team} vs ${data.scores.away.team}`,
             true,
         ]
-
-        // add values to google sheet
     } catch (err) {
         console.error(err)
         return [SCORELINE_TIPS, false]

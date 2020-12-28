@@ -5,7 +5,6 @@ import { MatchFact, League } from "./types"
 export function verifyMatchFact({ scores, stats }: MatchFact, league: League) {
     // verify team names
     const leagueTeams = teams[league]
-    console.log(leagueTeams, teams, league)
 
     if (!leagueTeams.includes(scores.home.team) || !leagueTeams.includes(scores.away.team)) {
         throw Error("")

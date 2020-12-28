@@ -17,7 +17,6 @@ client.on("message", async (message) => {
         const channelName = (message.channel as TextChannel).parent?.name || ""
         const category: any = removeEmoji(channelName).toLowerCase()
 
-        console.log(category)
         const [response, success] = await scorelineHandler(args, category)
 
         if (!success) {
