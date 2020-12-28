@@ -1,4 +1,5 @@
 import { GoogleSpreadsheet, WorksheetGridRange } from "google-spreadsheet"
+import config from "./config"
 import { MatchFact } from "./types"
 
 type SheetsInfo = {
@@ -24,7 +25,7 @@ export class SheetsIntegration {
     }
 
     async authorize() {
-        await this.doc.useServiceAccountAuth(require("../service-key.json"))
+        await this.doc.useServiceAccountAuth(config.serviceAccount as any)
         await this.doc.loadInfo()
     }
 

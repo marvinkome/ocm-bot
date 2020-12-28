@@ -1,6 +1,9 @@
 export default {
     botToken: process.env.BOT_TOKEN,
-    serviceAccountFile: process.env.SERVICE_ACCOUNT_FILE,
+    serviceAccount: {
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY,
+    },
     sheets: {
         championship: {
             sheetsId: "1o2kr3218nRU0R1HwiUg_cjwrfnmItCgZN7SS4VW9vzA",
