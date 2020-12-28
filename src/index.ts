@@ -14,8 +14,8 @@ client.on("message", async (message) => {
     const { command, args } = botParser(message.content)
 
     if (command === "scores") {
-        let category: any = (message.channel as TextChannel).parent?.name || ""
-        category = removeEmoji(category).toLowerCase()
+        const channelName = (message.channel as TextChannel).parent?.name || ""
+        const category: any = removeEmoji(channelName).toLowerCase()
 
         console.log(category)
         const [response, success] = await scorelineHandler(args, category)
