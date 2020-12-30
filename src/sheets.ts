@@ -73,14 +73,14 @@ export class SheetsIntegration {
         // find and update goals
         for (const row of rows) {
             // get players in a cell
-            const rowGoalScorer = sheet.getCellByA1(`B${row.rowIndex}`).value as string
-            const rowGoalScorerTeam = sheet.getCellByA1(`D${row.rowIndex}`).value as string
+            const rowGoalScorer = (sheet.getCellByA1(`B${row.rowIndex}`).value as string).trim()
+            const rowGoalScorerTeam = (sheet.getCellByA1(`D${row.rowIndex}`).value as string).trim()
 
-            const rowAssist = sheet.getCellByA1(`G${row.rowIndex}`).value as string
-            const rowAssistTeam = sheet.getCellByA1(`I${row.rowIndex}`).value as string
+            const rowAssist = (sheet.getCellByA1(`G${row.rowIndex}`).value as string).trim()
+            const rowAssistTeam = (sheet.getCellByA1(`I${row.rowIndex}`).value as string).trim()
 
-            const rowMotm = sheet.getCellByA1(`L${row.rowIndex}`).value as string
-            const rowMotmTeam = sheet.getCellByA1(`N${row.rowIndex}`).value as string
+            const rowMotm = (sheet.getCellByA1(`L${row.rowIndex}`).value as string).trim()
+            const rowMotmTeam = (sheet.getCellByA1(`N${row.rowIndex}`).value as string).trim()
 
             // find and update goals
             const goalScorer = players.find(
