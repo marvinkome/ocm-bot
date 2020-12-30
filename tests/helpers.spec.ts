@@ -2,7 +2,8 @@ import { removeEmoji, verifyMatchFact } from "../src/helpers"
 
 describe("Helpers", () => {
     test("removeEmoji", () => {
-        expect(removeEmoji("🔴championship")).toBe("championship")
+        expect(removeEmoji("🔴 championship")).toBe("championship")
+        expect(removeEmoji("🔴 championship")).toBe("championship")
         expect(removeEmoji("🅿 Premier League")).toBe("Premier League")
     })
 

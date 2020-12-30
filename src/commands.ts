@@ -13,17 +13,17 @@ const SCORELINE_TIPS = `Invalid scoreline. Tips:
 
 export async function scorelineHandler(args: string, category: League) {
     try {
+        console.log(category)
         const data = scorelineParser(args)
+
         verifyMatchFact(data, category)
 
-        console.log(data, category)
+        // add values to google sheet
+        const sheets = await new SheetsIntegration(config.sheets[category])
 
-        // // add values to google sheet
-        // const sheets = await new SheetsIntegration(config.sheets[category])
-
-        // await sheets.updateScoreline(data.scores)
-        // await sheets.updatePlayerStats(data.stats)
-        // await sheets.updatePlayerCard(data.stats)
+        await sheets.updateScoreline(data.scores)
+        await sheets.updatePlayerStats(data.stats)
+        await sheets.updatePlayerCard(data.stats)
 
         return [
             `Added scores to sheets for ${data.scores.home.team} vs ${data.scores.away.team}`,
