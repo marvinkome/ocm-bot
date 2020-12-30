@@ -2,7 +2,7 @@ export default {
     botToken: process.env.BOT_TOKEN,
     serviceAccount: {
         client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY,
+        private_key: (process.env.GOOGLE_PRIVATE_KEY as string).replace(/\\n/g, "\n"),
     },
     sheets: {
         championship: {
